@@ -24,4 +24,25 @@ class ProductDetailSerializer(serializers.ModelSerializer):
 class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
-        fields = '__all__'
+        fields = ['text']
+
+
+class ProductReviewSerializer(serializers.ModelSerializer):
+    reviews = ReviewSerializer(many=True)
+
+    class Meta:
+        model = Product
+        fields = ['id', 'title', 'reviews']
+
+
+class ProductTagsSerializer(serializers.ModelSerializer):
+    tags = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Product
+        fields = 'id title tags'.split()
+
+    def get_tags(self, product):
+        active_tags = product.tags.filter(is_active=True)
+        data = CategorySerializer(active_tags, many=True).data
+        return data
