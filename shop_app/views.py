@@ -5,11 +5,27 @@ from .serializers import CategorySerializer, ProductSerializer, ProductDetailSer
 from .models import Product, Category, Review
 
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 def product_list_view(request):
-    products = Product.objects.all()
-    data = ProductSerializer(products, many=True).data
-    return Response(data=data)
+    if request.method == 'GET':
+        products = Product.objects.all()
+        data = ProductSerializer(products, many=True).data
+        return Response(data=data)
+    elif request.method == 'POST':
+        title = request.data['title']
+        description = request.data.get('description','')
+        price = request.data['price']
+        category = request.data['category']
+        tags = request.data['tags']
+        product = Product.objects.create(
+            title=title, description=description,
+            price=price
+        )
+        return Response()
+
+        body = request.data
+        print(body)
+        return Response()
 
 
 @api_view(['GET'])
@@ -21,3 +37,9 @@ def product_detail_view(request, id):
                         data={'error': 'Movie Not Found!'})
     data = ProductDetailSerializer(product, many=False).data  # many=False стоит по дефолту, его не обяз писать
     return Response(data=data)
+
+# @api_view(['GET'])
+# def product_review_view(request):
+#     reviews = Review.objects.all()
+#     data = ReviewSerializer(reviews, many=True).data
+#     return Response(data=data)
