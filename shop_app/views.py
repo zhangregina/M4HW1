@@ -8,38 +8,46 @@ from .models import Product, Category, Review
 
 @api_view(['GET', 'POST'])
 def product_list_view(request):
-    # if request.method == 'GET':
-    products = Product.objects.all()
-    data = ProductSerializer(products, many=True).data
-    return Response(data=data)
+    if request.method == 'GET':
+        products = Product.objects.all()
+        data = ProductSerializer(products, many=True).data
+        return Response(data=data)
+    elif request.method == 'POST':
+        title = request.data['title']
+        description = request.data.get('description', '')
+        price = request.data['price']
+        category = request.data['category']
+        tags = request.data['tags']
+        product = Product.objects.create(
+            title=title, description=description,
+            price=price, category_id=category
+        )
+        product.tags.set(tags)
+        return Response(data=ProductDetailSerializer(product).data,
+                        status=status.HTTP_201_CREATED)
 
 
-# elif request.method == 'POST':
-#     title = request.data['title']
-#     description = request.data.get('description','')
-#     price = request.data['price']
-#     category = request.data['category']
-#     tags = request.data['tags']
-#     product = Product.objects.create(
-#         title=title, description=description,
-#         price=price
-#     )
-#     return Response()
-#
-#     body = request.data
-#     print(body)
-#     return Response()
-
-
-@api_view(['GET'])
+@api_view(['GET', 'DELETE', 'PUT'])
 def product_detail_view(request, id):
     try:
         product = Product.objects.get(id=id)
     except Product.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND,
-                        data={'error': 'Movie Not Found!'})
-    data = ProductDetailSerializer(product, many=False).data  # many=False стоит по дефолту, его не обяз писать
-    return Response(data=data)
+                        data={'error': 'Product Not Found!'})
+    if request.method == 'GET':
+        data = ProductDetailSerializer(product, many=False).data  # many=False стоит по дефолту, его не обяз писать
+        return Response(data=data)
+    elif request.method == 'DELETE':
+        product.delete()
+        return Response(data={'message': 'The product has been deleted.'})
+    elif request.method == 'PUT':
+        serializer = ProductDetailSerializer(product, data=request.data)
+        data = {}
+        if serializer.is_valid():
+            serializer.save()
+            data["success"] = "Successfully updated!!!"
+            return Response(data=data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])
