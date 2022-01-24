@@ -1,9 +1,11 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, permissions
 from .serializers import CategorySerializer, ProductSerializer, ProductDetailSerializer, ReviewSerializer, \
     ProductTagsSerializer, ProductPutSerializer
 from .models import Product, Category, Review
+
+#permission_classes = [permissions.IsAuthenticated]
 
 
 @api_view(['GET', 'POST'])
@@ -45,9 +47,6 @@ def product_detail_view(request, id):
         if not serializer.is_valid():
             return Response(status=status.HTTP_406_NOT_ACCEPTABLE,
                             data={'errors': serializer.errors})
-
-
-
 
         serializer = ProductDetailSerializer(product, data=request.data)
         data = {}
