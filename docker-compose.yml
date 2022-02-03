@@ -1,0 +1,28 @@
+#version: "3.8"
+#
+#services:
+#
+#  postgres_db:
+#    image: postgres:latest
+#    restart: always
+#    environment:
+#      POSTGRES_DB: "postgres"
+#      POSTGRES_USER: "postgres"
+#      POSTGRES_PASSWORD: "123"
+#    volumes:
+#      - postgres_data:/var/lib/postgresql/data
+#
+#  web:
+#    build: .
+#    restart: always
+#    tty: true
+#    depends_on:
+#      - postgres_db
+#    volumes:
+#      - .:/app
+#    command: sh -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8001"
+#    ports:
+#      - "8001:8001"
+#
+#volumes:
+#  postgres_data:

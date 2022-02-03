@@ -1,6 +1,8 @@
+from requests import Response
 from rest_framework import serializers
-from .models import Product, Category, Review
+from .models import Product, Category, Review, User
 from rest_framework.exceptions import ValidationError
+
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -61,3 +63,26 @@ class ProductPutSerializer(serializers.Serializer):
             raise ValidationError('This product already exists!!')
         return title
 
+
+class RegisterSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(min_length=3, max_length=20)
+    password = serializers.CharField(write_only=True, required=True)
+
+    class Meta:
+        model = User
+        fields = 'username password'.split()
+
+    def validate_username(self, username):
+        usernames = User.objects.filter(username=username)
+        if usernames:
+            raise ValidationError('This username already exists!!')
+        return username
+
+    def create(self, validated_data):
+        user = User.objects.create(
+            username=validated_data['username'],
+            password=validated_data['password']
+        )
+
+        user.save()
+        return user
